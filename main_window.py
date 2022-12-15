@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-from PyQt6.QtWidgets import (QApplication, QLabel, QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton)
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QLabel, QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton)
 from PyQt6.QtGui import QPixmap, QImage, QPixmap
 from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt, QThread, QUrl, QSize
 from PyQt6.QtMultimedia import QSoundEffect, QAudioOutput, QMediaPlayer
@@ -10,10 +10,12 @@ import numpy as np
 from classes.video_thread import VideoThread
 import config
 
+
 video_image_label = None
 image_label = None
 display_width = 450
 display_height = 450
+window = None
 
 def demo_sound(filename):
 	print('Reproduciendo audio: {0}'.format(filename))
@@ -47,27 +49,31 @@ def update_video(cap, frame):
 	video_image_label.setPixmap(qt_img)
 	
 @pyqtSlot(np.ndarray)
-def update_image(cap, frame):
+def update_image(cap, frame, objType):
 	global image_label
 	#from app import window
 	qt_img = convert_cv_qt(cap, frame)
 	image_label.setPixmap(qt_img)
 	# demo_sound( config.BASE_DIR + "/audios/persona-detectada.mp3" )
+	window.set_counter(objType)
 		
+# class MainWindow(QMainWindow):
 class MainWindow(QWidget):
-
 	# video_image_label	= None
 	#image_label = None
-		
+	current_user = None
+	
 	def __init__(self):
 		super().__init__()
+		# import app
+		# from app import current_user
 		self.setWindowTitle('Sistema de Control')
 		
 		self.leftContainer = QVBoxLayout()
 		self.rightContainer = QVBoxLayout()
 		self.container		= None
 		self.buttonsGrid	= None
-		self.buttonRegistrar	= None
+		# self.buttonRegistrar	= None
 		self.buttonIniciar		= None
 		self.buttonPausar		= None
 		self.buttonDetener		= None
@@ -88,7 +94,7 @@ class MainWindow(QWidget):
 		self.build()
 		
 	def build(self):
-		global video_image_label, image_label
+		global video_image_label, image_label, window
 		
 		self.container = QVBoxLayout()
 		topContainer = QHBoxLayout()
@@ -110,11 +116,11 @@ class MainWindow(QWidget):
 		colsContainer.addLayout(self.rightContainer)
 		self.buttonsGrid = QGridLayout()
 		
-		self.leftContainer.addWidget(QPushButton('Left Button'))
+		# self.leftContainer.addWidget(QPushButton('Left Button'))
 		self.leftContainer.addLayout(self.build_objects_counter())
 		self.leftContainer.addLayout(self.buttonsGrid)
 		
-		self.buttonRegistrar = QPushButton('Registrar')
+		# self.buttonRegistrar = QPushButton('Registrar')
 		self.buttonIniciar = QPushButton('Iniciar')
 		self.buttonIniciar.setProperty('class', 'btn-primary')
 		self.buttonPausar = QPushButton('Pausar')
@@ -127,7 +133,7 @@ class MainWindow(QWidget):
 		self.buttonReportes = QPushButton('Reportes')
 		self.buttonReportes.setProperty('class', 'btn-info')
 		
-		self.buttonsGrid.addWidget(self.buttonRegistrar, 0, 0)
+		# self.buttonsGrid.addWidget(self.buttonRegistrar, 0, 0)
 		self.buttonsGrid.addWidget(self.buttonIniciar, 1, 0)
 		self.buttonsGrid.addWidget(self.buttonPausar, 1, 1)
 		self.buttonsGrid.addWidget(self.buttonDetener, 1, 2)
@@ -143,9 +149,11 @@ class MainWindow(QWidget):
 		self.container.addLayout(topContainer)
 		self.container.addLayout(colsContainer)
 		self.setLayout( self.container )
+		#self.setCentralLayout( self.container )
 		
 		video_image_label = self.video_image_label
 		image_label = self.image_label
+		window = self
 		
 		self.set_events()
 
@@ -221,4 +229,27 @@ class MainWindow(QWidget):
 		self.thread.object_detected_signal.connect(update_image)
 		self.thread.start()
 		
-	
+	def set_user(self, user):
+		
+		self.current_user = user
+		print(self.current_user)
+
+	def set_counter(self, objType: str):
+		# print('Setting counter for', objType)
+		
+		if objType in ['persona']:
+			count = int(self.labelPersonCount.text())
+			count += 1
+			self.labelPersonCount.setText(str(count).zfill(6))
+		elif objType in ['pajaro', 'gato', 'vaca', 'perro', 'caballo']:
+			count = int(self.labelAnimalCount.text())
+			count += 1
+			self.labelAnimalCount.setText( str(count).zfill(6) )
+		elif objType in ['bicicleta', 'motorbike']
+			count = int(self.labelMCCount.text())
+			count += 1
+			self.labelMCCount.setText( str(count).zfill(6) )
+		elif objType in ['automovil', 'bus']:
+			count = int( self.labelCarCount.text() )
+			count += 1
+			self.labelCarCount.setText( str(count).zfill(6) )

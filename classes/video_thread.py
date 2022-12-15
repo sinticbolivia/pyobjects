@@ -8,7 +8,7 @@ import config
 	
 class VideoThread(QThread):
 	change_pixmap_signal = pyqtSignal(cv2.VideoCapture, np.ndarray)
-	object_detected_signal = pyqtSignal(cv2.VideoCapture, np.ndarray)
+	object_detected_signal = pyqtSignal(cv2.VideoCapture, np.ndarray, str)
 	
 	def run(self):
 		model = ObjDetector()
@@ -18,8 +18,8 @@ class VideoThread(QThread):
 	def onVideoAcquired(self, cap):
 		pass
 		
-	def onObjDetected(self, cap, frame):
-		self.object_detected_signal.emit(cap, frame)
+	def onObjDetected(self, cap, frame, objType):
+		self.object_detected_signal.emit(cap, frame, objType)
 		# self.playSound(config.BASE_DIR + "/audios/persona-detectada.wav")
 		
 	def onFrameRead(self, cap, frame):

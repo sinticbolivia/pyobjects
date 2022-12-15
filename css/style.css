@@ -14,6 +14,8 @@ QPushButton
 }
 QPushButton:hover{background-color:#BFBFBF;}
 QPushButton:focus{background-color:"green";}
+QLineEdit{background-color:#fff;border:1px solid #6c757d;border-radius:4px;padding:6px;}
+QLineEdit:focus{background-color:#D3F4FF;}
 .btn-primary{background-color:#0d6efd;color:#fff;border-color:#0d6efd;}
 .btn-primary:hover{background-color:#0b5ed7;}
 
