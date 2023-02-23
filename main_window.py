@@ -6,9 +6,11 @@ from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt, QThread, QUrl, QSize
 from PyQt6.QtMultimedia import QSoundEffect, QAudioOutput, QMediaPlayer
 import cv2
 import numpy as np
+from datetime import datetime
 
 from classes.video_thread import VideoThread
 import config
+from entities.record_history import RecordHistory
 
 
 video_image_label = None
@@ -90,9 +92,20 @@ class MainWindow(QWidget):
 		self.labelCarCount = None
 		self.labelMCCount = None
 		self.labelAnimalCount = None
+		self.recording = False
+		self.record_data = None
+		self.resetRecordData()
 		
 		self.build()
-		
+	
+	def resetRecordData(self):
+		self.record_data = RecordHistory()
+		self.record_data.total_cars = 0
+		self.record_data.total_motorcicles = 0
+		self.record_data.total_persons = 0
+		self.record_data.total_animals = 0
+		self.record_data.user_id = 0 # self.current_user.id
+				
 	def build(self):
 		global video_image_label, image_label, window
 		
@@ -211,6 +224,11 @@ class MainWindow(QWidget):
 		
 	def set_events(self):
 		self.buttonIniciar.clicked.connect(self.onBtnIniciarClicked)
+		self.buttonPausar.clicked.connect(self.onBtnPauseClicked)
+		self.buttonDetener.clicked.connect(self.onBtnStopClicked)
+		self.buttonGrabar.clicked.connect(self.onBtnGrabarClicked)
+		self.buttonReportes.clicked.connect(self.onBtnReportesClicked)
+		self.buttonHistorial.clicked.connect(self.onBtnHistorialClicked)
 	
 	def get_video_image_label(self):
 		return self.video_image_label
@@ -220,14 +238,68 @@ class MainWindow(QWidget):
 		
 	def onBtnIniciarClicked(self):
 		self.startCapture()
+	
+	def onBtnPauseClicked(self):
+		if self.thread is None:
+			return False
+		#self.thread.pause()
+		self.thread.togglePause()
+		
+	def onBtnStopClicked(self):
+		if self.thread is None:
+			return False
+			
+		self.thread.stop()
+		# self.thread.terminate()
+		# 
+		self.thread.quit()
+		# self.thread.exit()
+		self.thread.wait()
+		self.thread = None
+		
+	def onBtnGrabarClicked(self):
+		
+		if self.recording is True:
+			self.recording = False
+			self.buttonGrabar.setText('Grabar')
+			import database
+			self.record_data.user_id = self.current_user.id
+			self.record_data.end_datetime = datetime.now()
+			database.session.add(self.record_data)
+			# database.session.flush()
+			database.session.commit()
+			self.resetRecordData()
+			
+			return True
+			
+		self.recording = True
+		self.buttonGrabar.setText('Detener Grabacion')
+		self.record_data.start_datetime = datetime.now()
+		
+		return True
+		
+	def onBtnHistorialClicked(self):
+		from modals.record_history import RecordHistoryDialog
+		
+		self._dlg = RecordHistoryDialog()
+		self._dlg.show()
 		
 	def startCapture(self):
+		if self.thread is not None:
+			return False
+			
 		print('Starting capture thread')
 		# start capture thread
 		self.thread = VideoThread()
 		self.thread.change_pixmap_signal.connect(update_video)
 		self.thread.object_detected_signal.connect(update_image)
 		self.thread.start()
+		
+	def onBtnReportesClicked(self):
+		from models.model_reports import ModelReports
+		
+		report_model = ModelReports()
+		report_model.buildGeneral()
 		
 	def set_user(self, user):
 		
@@ -241,15 +313,27 @@ class MainWindow(QWidget):
 			count = int(self.labelPersonCount.text())
 			count += 1
 			self.labelPersonCount.setText(str(count).zfill(6))
+			if self.recording is True:
+				self.record_data.total_persons += 1
+				
 		elif objType in ['pajaro', 'gato', 'vaca', 'perro', 'caballo']:
 			count = int(self.labelAnimalCount.text())
 			count += 1
 			self.labelAnimalCount.setText( str(count).zfill(6) )
-		elif objType in ['bicicleta', 'motorbike']
+			if self.recording is True:
+				self.record_data.total_animals += 1
+				
+		elif objType in ['bicicleta', 'motorbike']:
 			count = int(self.labelMCCount.text())
 			count += 1
 			self.labelMCCount.setText( str(count).zfill(6) )
+			if self.recording is True:
+				self.record_data.total_motorcicles += 1
+				
 		elif objType in ['automovil', 'bus']:
 			count = int( self.labelCarCount.text() )
 			count += 1
 			self.labelCarCount.setText( str(count).zfill(6) )
+			if self.recording is True:
+				self.record_data.total_cars += 1
+				

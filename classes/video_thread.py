@@ -10,10 +10,23 @@ class VideoThread(QThread):
 	change_pixmap_signal = pyqtSignal(cv2.VideoCapture, np.ndarray)
 	object_detected_signal = pyqtSignal(cv2.VideoCapture, np.ndarray, str)
 	
+	
 	def run(self):
-		model = ObjDetector()
-		model.loadModels()
-		model.startCapture(self.onVideoAcquired, self.onFrameRead, self.onObjDetected)
+		self.model = ObjDetector()
+		self.model.loadModels()
+		self.model.startCapture(self.onVideoAcquired, self.onFrameRead, self.onObjDetected)
+	
+	def pause(self):
+		self.model.pause = True
+		
+	def resume(self):
+		self.model.pause = False
+	
+	def togglePause(self):
+		self.model.pause = False if self.model.pause else True
+		
+	def stop(self):
+		self.model.stop = True
 		
 	def onVideoAcquired(self, cap):
 		pass

@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Float, DateTime, orm
 import database
 from .base import BaseEntity
 
+
 class RecordHistory(database.Base, BaseEntity):
 	__tablename__	= 'recording_history'
 	__table_args__	= {'sqlite_autoincrement': True} 
@@ -15,6 +16,10 @@ class RecordHistory(database.Base, BaseEntity):
 	lng				= Column(String(128))
 	start_datetime	= Column(DateTime, default=datetime.utcnow)
 	end_datetime	= Column(DateTime)
+	total_persons	= Column(Integer)
+	total_cars		= Column(Integer)
+	total_motorcicles = Column(Integer)
+	total_animals		= Column(Integer)
 	
 	_serializable = ['id', 'user_id']
 	

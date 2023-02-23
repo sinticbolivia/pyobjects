@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+<style>
+*{font-size:12px;font-family:Helvetica,Verdana,Arial;}
+table{border-collapse:collapse;border:1px solid #000;}
+table th, table td{padding;3px;border:1px solid #000;}
+</style>
+</head>
+<body>
+<div id="page">
+	<div>
+		COMANDO GENERAL DEL EJERCITO<BR>
+		DEPARTAMENTO III - OPERACIONES<br/>
+		BOLIVIA
+	</div>
+	<h1 style="text-align:center;">
+		REPORTE GENERAL DEL P.M.A &quot;{{ nombre_usuario }}&quot;
+	</h1>
+	<table style="width:100%;">
+	<thead>
+	<tr>
+		<th>Nro.</th>
+		<th>Fecha</th>
+		<th>Personas</th>
+		<th>Vehiculos</th>
+		<th>Animales</th>
+		<th>Motocicletas</th>
+	</tr>
+	</thead>
+	<tbody>
+	{% set total_persons = 0 %}
+	{% for item in items %}
+	<tr>
+		<td>{{ '1' }}</td>
+		<td style="text-align:center;">{{ item[0] }}</td>
+		<td style="text-align:center;">{{ item[1] }}</td>
+		<td style="text-align:center;">{{ item[2] }}</td>
+		<td style="text-align:center;">{{ item[4] }}</td>
+		<td style="text-align:center;">{{ item[3] }}</td>
+	</tr>
+	{% set total_persons = total_persons + item[1] %}
+	{% endfor %}
+	</tbody>
+	<tfoot>
+	<tr>
+		<th colspan="2">Total</th>
+		<th>{{ total_persons }}</th>
+		<th>0</th>
+		<th>0</th>
+		<th>0</th>
+	</tr>
+	</tfoot>
+	</table>
+</div>
+</body>
+</html> 

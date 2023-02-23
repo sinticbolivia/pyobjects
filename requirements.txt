@@ -2,3 +2,5 @@ opencv-contrib-python
 pyqt6
 simpleaudio
 sqlalchemy
+pdfkit
+jinja2

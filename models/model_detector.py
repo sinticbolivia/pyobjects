@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import cv2
 import config
+import time
 
 class ObjDetector:
 
@@ -32,6 +33,8 @@ class ObjDetector:
 		self.protxt = None
 		self.model = None
 		self.net = None
+		self.pause = False
+		self.stop = False
 		
 	def loadModels(self):
 		# ----------- READ DNN MODEL -----------
@@ -79,6 +82,13 @@ class ObjDetector:
 			callbackVideoAcquired(cap)
 			
 		while True:
+			if self.pause is True:
+				time.sleep(1)
+				continue
+				
+			if self.stop is True:
+				break
+				
 			ret, frame, = cap.read()
 			if ret == False:
 				break
